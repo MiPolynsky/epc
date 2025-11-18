@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { MapPin, Phone, Mail } from 'lucide-react';
 
 const Contacts = () => {
   return (
@@ -50,16 +50,6 @@ const Contacts = () => {
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <Clock className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-1">Режим работы</h4>
-                    <p className="text-gray-600">Пн-Пт: 9:00 - 18:00</p>
-                    <p className="text-gray-600">Сб-Вс: Выходной</p>
-                  </div>
-                </div>
               </div>
             </div>
 

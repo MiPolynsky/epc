@@ -61,13 +61,35 @@ const ContactForm = () => {
     setSubmitStatus('idle');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSubmitStatus('success');
-      setFormData({ name: '', phone: '', email: '', message: '' });
-      setFiles([]);
-      generateCaptcha();
-      setTimeout(() => setSubmitStatus('idle'), 3000);
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/send-contact-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          message: formData.message,
+          files: files.map(f => ({ name: f.name, size: f.size })),
+        }),
+      });
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setFormData({ name: '', phone: '', email: '', message: '' });
+        setFiles([]);
+        generateCaptcha();
+        setTimeout(() => setSubmitStatus('idle'), 5000);
+      } else {
+        throw new Error('Failed to send');
+      }
     } catch (error) {
+      console.error('Error sending form:', error);
       setSubmitStatus('error');
       generateCaptcha();
     } finally {
@@ -123,7 +145,7 @@ const ContactForm = () => {
 
               <div className="mt-8 pt-8 border-t border-gray-200">
                 <p className="text-gray-600">
-                  Работаем по будням с 9:00 до 18:00
+                  Работаем по будням с 7:00 до 16:00 (МСК)
                 </p>
               </div>
             </div>

@@ -1,6 +1,18 @@
 import { FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const DocumentsPage = () => {
+  const navigate = useNavigate();
+
+  const handleConsultationClick = () => {
+    navigate('/contacts');
+    setTimeout(() => {
+      const formElement = document.querySelector('form');
+      if (formElement) {
+        formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  };
 
   const downloadableDocuments = [
     {
@@ -78,7 +90,10 @@ const DocumentsPage = () => {
           <p className="text-gray-300 mb-6">
             Наши специалисты помогут разобраться с необходимым пакетом документов и ответят на все ваши вопросы
           </p>
-          <button className="px-6 py-3 bg-[#ffcc00] text-black font-medium rounded-lg hover:bg-yellow-500 transition-colors">
+          <button
+            onClick={handleConsultationClick}
+            className="px-6 py-3 bg-[#ffcc00] text-black font-medium rounded-lg hover:bg-yellow-500 transition-colors"
+          >
             Получить консультацию
           </button>
         </div>

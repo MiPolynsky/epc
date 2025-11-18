@@ -127,7 +127,7 @@ const ContactsPage = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Режим работы</h3>
-                  <p className="text-xl text-gray-700">Пн-Пт: 9:00 - 18:00</p>
+                  <p className="text-xl text-gray-700">Пн-Пт: 7:00 - 16:00 (МСК)</p>
                   <p className="text-sm text-gray-600 mt-1">Суббота и воскресенье - выходной</p>
                 </div>
               </div>
@@ -138,11 +138,11 @@ const ContactsPage = () => {
                 Реквизиты компании
               </h3>
               <div className="space-y-2 text-gray-700">
-                <p><span className="font-semibold">ООО:</span> "ЭПЦ"</p>
+                <p><span className="font-semibold">Полное название:</span> Общество с ограниченной ответственностью "ЭПЦ"</p>
                 <p><span className="font-semibold">ИНН:</span> 5543044558</p>
                 <p><span className="font-semibold">КПП:</span> 554301001</p>
                 <p><span className="font-semibold">ОГРН:</span> 1145543044558</p>
-                <p><span className="font-semibold">Директор:</span> Петров Дмитрий Николаевич</p>
+                <p><span className="font-semibold">Юридический адрес:</span> 644024, Омская обл., г. Омск, ул. Голика, д. 2, оф. 37</p>
               </div>
             </div>
           </div>
@@ -201,13 +201,12 @@ const ContactsPage = () => {
 
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                  Сообщение <span className="text-red-500">*</span>
+                  Сообщение
                 </label>
                 <textarea
                   id="message"
                   name="message"
                   rows={5}
-                  required
                   value={formData.message}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ead615] focus:border-transparent transition-all resize-none"

@@ -70,7 +70,15 @@ const Header = () => {
           </nav>
 
           <div className="absolute left-1/2 transform -translate-x-1/2" style={{ marginLeft: '-30px' }}>
-            <Link to="/" className="border-2 border-black w-16 h-16 flex items-center justify-center transition-colors hover:bg-[#ffcc00]">
+            <Link
+              to="/"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.history.pushState({}, '', '/');
+              }}
+              className="border-2 border-black w-16 h-16 flex items-center justify-center transition-colors hover:bg-[#ffcc00]"
+            >
               <div className="text-2xl text-black tracking-wide" style={{ fontFamily: "'Gothic A1', sans-serif", fontWeight: 200 }}>
                 ЭПЦ
               </div>
