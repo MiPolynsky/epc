@@ -1,0 +1,17 @@
+# Force HTTPS redirect
+http://* https://:splat 301!
+
+# Static pages for SEO
+/about                                  /about.html                                200
+/services                               /services.html                             200
+/services/project-documentation         /services/project-documentation.html       200
+/services/engineering-surveys           /services/engineering-surveys.html         200
+/services/cost-estimates                /services/cost-estimates.html              200
+/services/expert-support                /services/expert-support.html              200
+/services/judicial-expertise            /services/judicial-expertise.html          200
+/services/design-and-surveys            /services/design-and-surveys.html          200
+/documents                              /documents.html                            200
+/contacts                               /contacts.html                             200
+
+# SPA fallback
+/*                                      /index.html                                200
