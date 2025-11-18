@@ -142,12 +142,6 @@ const ContactForm = () => {
                   </div>
                 </div>
               </div>
-
-              <div className="mt-8 pt-8 border-t border-gray-200">
-                <p className="text-gray-600">
-                  Работаем по будням с 7:00 до 16:00 (МСК)
-                </p>
-              </div>
             </div>
 
             <form onSubmit={handleSubmit} className="bg-white rounded-xl p-8 shadow-lg">

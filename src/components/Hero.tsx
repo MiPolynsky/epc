@@ -1,6 +1,6 @@
 const Hero = () => {
   return (
-    <section className="py-16 flex items-center" style={{ backgroundColor: '#ffcc00', height: '200px' }}>
+    <section className="py-16 flex items-center" style={{ backgroundColor: '#ffcc00', height: '230px' }}>
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-lg md:text-xl text-black font-light mb-4" style={{ marginTop: '-20px' }}>
