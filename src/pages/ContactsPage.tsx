@@ -64,12 +64,12 @@ const ContactsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white py-16 border-b border-gray-200">
+      <div className="py-16" style={{ backgroundColor: '#ffcc00' }}>
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-center text-black mb-4">
             Контакты
           </h1>
-          <p className="text-lg text-center text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-center text-black max-w-2xl mx-auto">
             Свяжитесь с нами удобным для вас способом
           </p>
         </div>
@@ -139,10 +139,11 @@ const ContactsPage = () => {
               </h3>
               <div className="space-y-2 text-gray-700">
                 <p><span className="font-semibold">Полное название:</span> Общество с ограниченной ответственностью "ЭПЦ"</p>
-                <p><span className="font-semibold">ИНН:</span> 5543044558</p>
-                <p><span className="font-semibold">КПП:</span> 554301001</p>
+                <p><span className="font-semibold">ИНН:</span> 5503253624</p>
+                <p><span className="font-semibold">КПП:</span> 550301001</p>
                 <p><span className="font-semibold">ОГРН:</span> 1145543044558</p>
                 <p><span className="font-semibold">Юридический адрес:</span> 644024, Омская обл., г. Омск, ул. Голика, д. 2, оф. 37</p>
+                <p><span className="font-semibold">Директор:</span> Семахин Михаил Александрович</p>
               </div>
             </div>
           </div>

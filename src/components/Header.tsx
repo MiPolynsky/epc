@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { services } from '../data/servicesData';
 
@@ -7,6 +7,8 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     return () => {
@@ -28,6 +30,15 @@ const Header = () => {
     closeTimeoutRef.current = setTimeout(() => {
       setIsServicesOpen(false);
     }, 300);
+  };
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate('/');
+    }
   };
 
   return (
@@ -72,11 +83,7 @@ const Header = () => {
           <div className="absolute left-1/2 transform -translate-x-1/2" style={{ marginLeft: '-30px' }}>
             <Link
               to="/"
-              onClick={(e) => {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                window.history.pushState({}, '', '/');
-              }}
+              onClick={handleLogoClick}
               className="border-2 border-black w-16 h-16 flex items-center justify-center transition-colors hover:bg-[#ffcc00]"
             >
               <div className="text-2xl text-black tracking-wide" style={{ fontFamily: "'Gothic A1', sans-serif", fontWeight: 200 }}>
