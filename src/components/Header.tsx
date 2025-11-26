@@ -80,7 +80,7 @@ const Header = () => {
             </div>
           </nav>
 
-          <div className="absolute left-1/2 transform -translate-x-1/2" style={{ marginLeft: '-30px' }}>
+          <div className="absolute left-1/2 transform -translate-x-1/2 lg:ml-[-30px]">
             <Link
               to="/"
               onClick={handleLogoClick}
