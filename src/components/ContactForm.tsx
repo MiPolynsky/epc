@@ -122,6 +122,8 @@ const ContactForm = () => {
         </div>
       `;
 
+      const emailRecipients = import.meta.env.VITE_EMAIL_TO.split(',').map((email: string) => email.trim());
+
       const resendResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -130,7 +132,7 @@ const ContactForm = () => {
         },
         body: JSON.stringify({
           from: 'onboarding@resend.dev',
-          to: [import.meta.env.VITE_EMAIL_TO],
+          to: emailRecipients,
           subject: emailSubject,
           text: emailBody,
           html: emailHtml,
