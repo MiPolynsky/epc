@@ -19,7 +19,7 @@ const ContactForm = () => {
   const [captchaNum2, setCaptchaNum2] = useState(0);
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error' | 'captcha-error'>('idle');
 
   useEffect(() => {
     generateCaptcha();
@@ -57,7 +57,7 @@ const ContactForm = () => {
 
     const correctAnswer = captchaNum1 + captchaNum2;
     if (parseInt(captchaAnswer) !== correctAnswer) {
-      setSubmitStatus('error');
+      setSubmitStatus('captcha-error');
       setTimeout(() => setSubmitStatus('idle'), 3000);
       generateCaptcha();
       return;
@@ -152,7 +152,7 @@ const ContactForm = () => {
     } catch (error) {
       console.error('Error sending form:', error);
       setSubmitStatus('error');
-      generateCaptcha();
+      setTimeout(() => setSubmitStatus('idle'), 5000);
     } finally {
       setIsSubmitting(false);
     }
@@ -330,9 +330,15 @@ const ContactForm = () => {
               </div>
             )}
 
-            {submitStatus === 'error' && (
+            {submitStatus === 'captcha-error' && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
                 Неверный ответ на вопрос. Попробуйте еще раз.
+              </div>
+            )}
+
+            {submitStatus === 'error' && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+                Произошла ошибка при отправке. Попробуйте еще раз или свяжитесь с нами по телефону.
               </div>
             )}
 
