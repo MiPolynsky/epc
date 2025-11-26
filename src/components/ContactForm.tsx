@@ -90,6 +90,31 @@ const ContactForm = () => {
 
       console.log('Message saved successfully:', data);
 
+      if (data && data[0]) {
+        try {
+          const telegramResponse = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-telegram-notification`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+              },
+              body: JSON.stringify({
+                ...data[0],
+                created_at: new Date().toISOString()
+              })
+            }
+          );
+
+          if (!telegramResponse.ok) {
+            console.error('Failed to send Telegram notification');
+          }
+        } catch (telegramError) {
+          console.error('Error sending Telegram notification:', telegramError);
+        }
+      }
+
       setSubmitStatus('success');
       setFormData({ name: '', phone: '', email: '', message: '' });
       setFiles([]);

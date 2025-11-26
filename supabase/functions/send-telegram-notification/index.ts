@@ -26,22 +26,11 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
-    const chatId = Deno.env.get("TELEGRAM_CHAT_ID");
+    const botToken = "8585590275:AAFf-g8J_QJ99RXEDaWogOMcIjWlHD6uoLU";
+    const chatId = "226815424";
 
     console.log("Bot token present:", !!botToken);
     console.log("Chat ID present:", !!chatId);
-
-    if (!botToken || !chatId) {
-      console.error("Missing Telegram credentials");
-      return new Response(
-        JSON.stringify({ error: "Telegram credentials not configured" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
 
     const data: ContactMessage = await req.json();
     console.log("Received data:", JSON.stringify(data));

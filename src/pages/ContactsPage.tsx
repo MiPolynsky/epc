@@ -66,6 +66,32 @@ const ContactsPage = () => {
         throw error;
       }
 
+      try {
+        const telegramResponse = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-telegram-notification`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({
+              name: formData.name,
+              email: formData.email,
+              phone: formData.phone || '',
+              message: formData.message || '',
+              created_at: new Date().toISOString()
+            })
+          }
+        );
+
+        if (!telegramResponse.ok) {
+          console.error('Failed to send Telegram notification');
+        }
+      } catch (telegramError) {
+        console.error('Error sending Telegram notification:', telegramError);
+      }
+
       setSubmitStatus('success');
       setFormData({ name: '', email: '', phone: '', message: '' });
       generateCaptcha();
