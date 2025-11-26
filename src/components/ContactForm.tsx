@@ -64,32 +64,6 @@ const ContactForm = () => {
     try {
       const filesInfo = files.map(f => ({ name: f.name, size: f.size }));
 
-      const emailPayload = {
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        message: formData.message,
-        files_info: filesInfo,
-        created_at: new Date().toISOString(),
-      };
-
-      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-smtp`;
-
-      const emailResponse = await fetch(functionUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify(emailPayload),
-      });
-
-      if (!emailResponse.ok) {
-        const errorData = await emailResponse.json();
-        console.error('Email sending error:', errorData);
-        throw new Error('Failed to send email');
-      }
-
       const { error: dbError } = await supabase
         .from('contact_messages')
         .insert([
@@ -104,7 +78,30 @@ const ContactForm = () => {
 
       if (dbError) {
         console.error('Database error:', dbError);
+        throw new Error('Failed to save message');
       }
+
+      const emailPayload = {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        message: formData.message,
+        files_info: filesInfo,
+        created_at: new Date().toISOString(),
+      };
+
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-smtp`;
+
+      fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify(emailPayload),
+      }).catch(error => {
+        console.error('Email sending error (non-critical):', error);
+      });
 
       setSubmitStatus('success');
       setFormData({ name: '', phone: '', email: '', message: '' });
