@@ -64,7 +64,15 @@ const ContactForm = () => {
     try {
       const filesInfo = files.map(f => ({ name: f.name, size: f.size }));
 
-      const { error: dbError } = await supabase
+      console.log('Attempting to insert message:', {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        message: formData.message,
+        files_info: filesInfo,
+      });
+
+      const { data: insertedData, error: dbError } = await supabase
         .from('contact_messages')
         .insert([
           {
@@ -74,12 +82,18 @@ const ContactForm = () => {
             message: formData.message,
             files_info: filesInfo,
           }
-        ]);
+        ])
+        .select();
+
+      console.log('Insert result:', { insertedData, dbError });
 
       if (dbError) {
         console.error('Database error:', dbError);
+        alert('Ошибка сохранения в базу данных: ' + dbError.message);
         throw new Error('Failed to save message');
       }
+
+      console.log('Message saved successfully!');
 
       const emailPayload = {
         name: formData.name,
