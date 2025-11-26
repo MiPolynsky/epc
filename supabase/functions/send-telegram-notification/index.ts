@@ -16,6 +16,8 @@ interface ContactMessage {
 }
 
 Deno.serve(async (req: Request) => {
+  console.log("Function called");
+  
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 200,
@@ -26,6 +28,9 @@ Deno.serve(async (req: Request) => {
   try {
     const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
     const chatId = Deno.env.get("TELEGRAM_CHAT_ID");
+
+    console.log("Bot token present:", !!botToken);
+    console.log("Chat ID present:", !!chatId);
 
     if (!botToken || !chatId) {
       console.error("Missing Telegram credentials");
@@ -39,6 +44,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const data: ContactMessage = await req.json();
+    console.log("Received data:", JSON.stringify(data));
 
     const filesText = data.files_info && data.files_info.length > 0
       ? "\n\n📎 Прикрепленные файлы:\n" + data.files_info.map(f => `  • ${f.name} (${(f.size / 1024).toFixed(1)} KB)`).join("\n")
@@ -52,6 +58,7 @@ Deno.serve(async (req: Request) => {
       filesText +
       `\n\n🕐 <b>Дата:</b> ${new Date(data.created_at).toLocaleString("ru-RU")}`;
 
+    console.log("Sending to Telegram...");
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
     
     const response = await fetch(telegramUrl, {
@@ -66,9 +73,11 @@ Deno.serve(async (req: Request) => {
       }),
     });
 
+    const responseData = await response.text();
+    console.log("Telegram response:", responseData);
+
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error("Telegram API error:", errorData);
+      console.error("Telegram API error:", responseData);
       throw new Error(`Telegram API error: ${response.status}`);
     }
 
