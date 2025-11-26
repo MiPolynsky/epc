@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Send, Phone, Mail, MapPin, Paperclip, X } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -59,7 +63,6 @@ const ContactForm = () => {
     }
 
     setIsSubmitting(true);
-    setSubmitStatus('idle');
 
     try {
       const filesInfo = files.map(f => ({ name: f.name, size: f.size }));
@@ -84,33 +87,12 @@ const ContactForm = () => {
       if (error) {
         console.error('Database error:', error);
         setSubmitStatus('error');
+        setIsSubmitting(false);
         setTimeout(() => setSubmitStatus('idle'), 5000);
         return;
       }
 
       console.log('Message saved successfully:', data);
-
-      const emailPayload = {
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        message: formData.message,
-        files_info: filesInfo,
-        created_at: new Date().toISOString(),
-      };
-
-      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-smtp`;
-
-      fetch(functionUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify(emailPayload),
-      }).catch(error => {
-        console.error('Email sending error (non-critical):', error);
-      });
 
       setSubmitStatus('success');
       setFormData({ name: '', phone: '', email: '', message: '' });
@@ -118,7 +100,7 @@ const ContactForm = () => {
       generateCaptcha();
       setTimeout(() => setSubmitStatus('idle'), 5000);
     } catch (error) {
-      console.error('Error sending form:', error);
+      console.error('Error:', error);
       setSubmitStatus('error');
       setTimeout(() => setSubmitStatus('idle'), 5000);
     } finally {
