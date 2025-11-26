@@ -30,7 +30,8 @@ Deno.serve(async (req: Request) => {
     const smtpPort = parseInt(Deno.env.get("SMTP_PORT") || "587");
     const smtpUser = Deno.env.get("SMTP_USER");
     const smtpPass = Deno.env.get("SMTP_PASS");
-    const emailTo = Deno.env.get("EMAIL_TO") || "expert.p.c@mail.ru";
+    const emailToStr = Deno.env.get("EMAIL_TO") || "expert.p.c@mail.ru";
+    const emailTo = emailToStr.split(',').map(email => email.trim());
 
     if (!smtpUser || !smtpPass) {
       console.error("SMTP credentials missing");
@@ -48,8 +49,8 @@ Deno.serve(async (req: Request) => {
 
     let filesText = "";
     if (payload.files_info && payload.files_info.length > 0) {
-      filesText = "\n\nПрикрепленные файлы (" + payload.files_info.length + "):\n";
-      filesText += payload.files_info
+      filesText = "\n\nПрикрепленные файлы (" + payload.files_info.length + "):";
+      filesText += "\n" + payload.files_info
         .map((f) => `- ${f.name} (${Math.round(f.size / 1024)} KB)`)
         .join("\n");
     }
@@ -122,12 +123,16 @@ ${payload.message || ""}${filesText}
     await sendCommand(btoa(smtpUser));
     await sendCommand(btoa(smtpPass));
     await sendCommand(`MAIL FROM:<${smtpUser}>`);
-    await sendCommand(`RCPT TO:<${emailTo}>`);
+
+    for (const recipient of emailTo) {
+      await sendCommand(`RCPT TO:<${recipient}>`);
+    }
+
     await sendCommand("DATA");
 
     const emailMessage = [
       `From: ${smtpUser}`,
-      `To: ${emailTo}`,
+      `To: ${emailTo.join(', ')}`,
       `Subject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(emailSubject)))}?=`,
       "MIME-Version: 1.0",
       "Content-Type: text/plain; charset=UTF-8",

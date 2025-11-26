@@ -78,7 +78,7 @@ const ContactForm = () => {
         created_at: new Date().toISOString(),
       };
 
-      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-resend`;
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-smtp`;
 
       const emailResponse = await fetch(functionUrl, {
         method: 'POST',
