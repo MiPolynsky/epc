@@ -67,7 +67,9 @@ const ContactForm = () => {
     setSubmitStatus('idle');
 
     try {
-      const { error } = await supabase
+      const filesInfo = files.map(f => ({ name: f.name, size: f.size }));
+
+      const { error: dbError } = await supabase
         .from('contact_messages')
         .insert([
           {
@@ -75,12 +77,69 @@ const ContactForm = () => {
             phone: formData.phone,
             email: formData.email,
             message: formData.message,
-            files_info: files.map(f => ({ name: f.name, size: f.size })),
+            files_info: filesInfo,
           }
         ]);
 
-      if (error) {
-        throw error;
+      if (dbError) {
+        throw dbError;
+      }
+
+      let filesText = '';
+      if (filesInfo.length > 0) {
+        filesText = `\n\nПрикрепленные файлы (${filesInfo.length}):\n`;
+        filesText += filesInfo.map((f) => `- ${f.name} (${Math.round(f.size / 1024)} KB)`).join('\n');
+      }
+
+      const emailSubject = `Новая заявка с сайта от ${formData.name}`;
+      const emailBody = `Новая заявка с сайта Экспертно-Проектного Центра\n\nИмя: ${formData.name}\nТелефон: ${formData.phone}\nEmail: ${formData.email}\n\nСообщение:\n${formData.message || ''}${filesText}\n\n---\nОтправлено: ${new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Omsk' })}`;
+
+      const emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Новая заявка с сайта Экспертно-Проектного Центра</h2>
+          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Имя:</strong> ${formData.name}</p>
+            <p><strong>Телефон:</strong> ${formData.phone}</p>
+            <p><strong>Email:</strong> ${formData.email}</p>
+          </div>
+          ${formData.message ? `
+            <div style="margin: 20px 0;">
+              <strong>Сообщение:</strong>
+              <p style="white-space: pre-wrap;">${formData.message}</p>
+            </div>
+          ` : ''}
+          ${filesInfo.length > 0 ? `
+            <div style="margin: 20px 0;">
+              <strong>Прикрепленные файлы (${filesInfo.length}):</strong>
+              <ul>
+                ${filesInfo.map((f) => `<li>${f.name} (${Math.round(f.size / 1024)} KB)</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
+            Отправлено: ${new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Omsk' })}
+          </div>
+        </div>
+      `;
+
+      const resendResponse = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'onboarding@resend.dev',
+          to: [import.meta.env.VITE_EMAIL_TO],
+          subject: emailSubject,
+          text: emailBody,
+          html: emailHtml,
+        }),
+      });
+
+      if (!resendResponse.ok) {
+        const errorData = await resendResponse.json();
+        console.error('Resend API error:', errorData);
       }
 
       setSubmitStatus('success');
