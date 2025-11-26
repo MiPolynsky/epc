@@ -69,25 +69,26 @@ const ContactForm = () => {
         phone: formData.phone,
         email: formData.email,
         message: formData.message || '',
-        files_info: filesInfo.length > 0 ? filesInfo : [],
+        files_info: filesInfo
       };
 
-      console.log('Attempting to insert message:', messageData);
+      console.log('Sending data:', messageData);
 
-      const { data: insertedData, error: dbError } = await supabase
+      const { data, error } = await supabase
         .from('contact_messages')
         .insert([messageData])
         .select();
 
-      console.log('Insert result:', { insertedData, dbError });
+      console.log('Result:', { data, error });
 
-      if (dbError) {
-        console.error('Database error:', dbError);
-        alert('Ошибка сохранения в базу данных: ' + JSON.stringify(dbError));
-        throw new Error('Failed to save message');
+      if (error) {
+        console.error('Database error:', error);
+        setSubmitStatus('error');
+        setTimeout(() => setSubmitStatus('idle'), 5000);
+        return;
       }
 
-      console.log('Message saved successfully:', insertedData);
+      console.log('Message saved successfully:', data);
 
       const emailPayload = {
         name: formData.name,
