@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Send, Phone, Mail, MapPin, Paperclip, X } from 'lucide-react';
-
-declare global {
-  interface Window {
-    supabase: {
-      createClient: (url: string, key: string) => any;
-    };
-  }
-}
+import { supabase } from '../lib/supabase';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -22,21 +15,9 @@ const ContactForm = () => {
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error' | 'captcha-error'>('idle');
-  const [supabase, setSupabase] = useState<any>(null);
 
   useEffect(() => {
     generateCaptcha();
-
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    script.onload = () => {
-      const supabaseUrl = 'https://apzouhutnaeigyhdfyqf.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwem91aHV0bmFlaWd5aGRmeXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzNzYxODYsImV4cCI6MjA3ODk1MjE4Nn0.uk5wth7SDYWqmGuYDeTqs71AYM9RRS7anwwVwWcpHok';
-      const client = window.supabase.createClient(supabaseUrl, supabaseKey);
-      setSupabase(client);
-      console.log('Supabase initialized');
-    };
-    document.head.appendChild(script);
   }, []);
 
   const generateCaptcha = () => {
@@ -68,13 +49,6 @@ const ContactForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!supabase) {
-      console.error('Supabase not initialized');
-      setSubmitStatus('error');
-      setTimeout(() => setSubmitStatus('idle'), 5000);
-      return;
-    }
 
     const correctAnswer = captchaNum1 + captchaNum2;
     if (parseInt(captchaAnswer) !== correctAnswer) {
@@ -335,13 +309,11 @@ const ContactForm = () => {
 
             <button
               type="submit"
-              disabled={isSubmitting || !supabase}
+              disabled={isSubmitting}
               className="w-full bg-[#ffcc00] text-black font-semibold py-4 px-6 rounded-lg hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {isSubmitting ? (
                 'Отправка...'
-              ) : !supabase ? (
-                'Загрузка...'
               ) : (
                 <>
                   Отправить заявку
