@@ -30,7 +30,8 @@ export default function AdminPage() {
   }, [user, filter]);
 
   async function checkAuth() {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabase.auth.getUser();
+    console.log('Auth check:', { user, error });
     setUser(user);
     if (!user) {
       setLoading(false);
@@ -39,6 +40,8 @@ export default function AdminPage() {
 
   async function loadMessages() {
     setLoading(true);
+    console.log('Loading messages with filter:', filter);
+
     let query = supabase
       .from('contact_messages')
       .select('*')
@@ -50,8 +53,11 @@ export default function AdminPage() {
 
     const { data, error } = await query;
 
+    console.log('Messages loaded:', { data, error, count: data?.length });
+
     if (error) {
       console.error('Error loading messages:', error);
+      alert('Ошибка загрузки сообщений: ' + error.message);
     } else {
       setMessages(data || []);
     }
