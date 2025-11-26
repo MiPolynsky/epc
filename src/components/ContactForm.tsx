@@ -64,36 +64,30 @@ const ContactForm = () => {
     try {
       const filesInfo = files.map(f => ({ name: f.name, size: f.size }));
 
-      console.log('Attempting to insert message:', {
+      const messageData = {
         name: formData.name,
         phone: formData.phone,
         email: formData.email,
-        message: formData.message,
-        files_info: filesInfo,
-      });
+        message: formData.message || '',
+        files_info: filesInfo.length > 0 ? filesInfo : [],
+      };
+
+      console.log('Attempting to insert message:', messageData);
 
       const { data: insertedData, error: dbError } = await supabase
         .from('contact_messages')
-        .insert([
-          {
-            name: formData.name,
-            phone: formData.phone,
-            email: formData.email,
-            message: formData.message,
-            files_info: filesInfo,
-          }
-        ])
+        .insert([messageData])
         .select();
 
       console.log('Insert result:', { insertedData, dbError });
 
       if (dbError) {
         console.error('Database error:', dbError);
-        alert('Ошибка сохранения в базу данных: ' + dbError.message);
+        alert('Ошибка сохранения в базу данных: ' + JSON.stringify(dbError));
         throw new Error('Failed to save message');
       }
 
-      console.log('Message saved successfully!');
+      console.log('Message saved successfully:', insertedData);
 
       const emailPayload = {
         name: formData.name,
