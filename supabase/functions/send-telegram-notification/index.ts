@@ -1,0 +1,92 @@
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+};
+
+interface ContactMessage {
+  name: string;
+  phone: string;
+  email: string;
+  message: string;
+  files_info?: Array<{ name: string; size: number }>;
+  created_at: string;
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
+  try {
+    const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
+    const chatId = Deno.env.get("TELEGRAM_CHAT_ID");
+
+    if (!botToken || !chatId) {
+      console.error("Missing Telegram credentials");
+      return new Response(
+        JSON.stringify({ error: "Telegram credentials not configured" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const data: ContactMessage = await req.json();
+
+    const filesText = data.files_info && data.files_info.length > 0
+      ? "\n\n📎 Прикрепленные файлы:\n" + data.files_info.map(f => `  • ${f.name} (${(f.size / 1024).toFixed(1)} KB)`).join("\n")
+      : "";
+
+    const messageText = `🔔 <b>Новая заявка с сайта!</b>\n\n` +
+      `👤 <b>Имя:</b> ${data.name}\n` +
+      `📱 <b>Телефон:</b> ${data.phone}\n` +
+      `📧 <b>Email:</b> ${data.email}\n` +
+      `💬 <b>Сообщение:</b>\n${data.message || "Не указано"}` +
+      filesText +
+      `\n\n🕐 <b>Дата:</b> ${new Date(data.created_at).toLocaleString("ru-RU")}`;
+
+    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    
+    const response = await fetch(telegramUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: messageText,
+        parse_mode: "HTML",
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error("Telegram API error:", errorData);
+      throw new Error(`Telegram API error: ${response.status}`);
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, message: "Notification sent" }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    console.error("Error:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+});
