@@ -69,6 +69,32 @@ const ContactForm = () => {
     try {
       const filesInfo = files.map(f => ({ name: f.name, size: f.size }));
 
+      const emailPayload = {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        message: formData.message,
+        files_info: filesInfo,
+        created_at: new Date().toISOString(),
+      };
+
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-resend`;
+
+      const emailResponse = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify(emailPayload),
+      });
+
+      if (!emailResponse.ok) {
+        const errorData = await emailResponse.json();
+        console.error('Email sending error:', errorData);
+        throw new Error('Failed to send email');
+      }
+
       const { error: dbError } = await supabase
         .from('contact_messages')
         .insert([
@@ -82,66 +108,7 @@ const ContactForm = () => {
         ]);
 
       if (dbError) {
-        throw dbError;
-      }
-
-      let filesText = '';
-      if (filesInfo.length > 0) {
-        filesText = `\n\nПрикрепленные файлы (${filesInfo.length}):\n`;
-        filesText += filesInfo.map((f) => `- ${f.name} (${Math.round(f.size / 1024)} KB)`).join('\n');
-      }
-
-      const emailSubject = `Новая заявка с сайта от ${formData.name}`;
-      const emailBody = `Новая заявка с сайта Экспертно-Проектного Центра\n\nИмя: ${formData.name}\nТелефон: ${formData.phone}\nEmail: ${formData.email}\n\nСообщение:\n${formData.message || ''}${filesText}\n\n---\nОтправлено: ${new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Omsk' })}`;
-
-      const emailHtml = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">Новая заявка с сайта Экспертно-Проектного Центра</h2>
-          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>Имя:</strong> ${formData.name}</p>
-            <p><strong>Телефон:</strong> ${formData.phone}</p>
-            <p><strong>Email:</strong> ${formData.email}</p>
-          </div>
-          ${formData.message ? `
-            <div style="margin: 20px 0;">
-              <strong>Сообщение:</strong>
-              <p style="white-space: pre-wrap;">${formData.message}</p>
-            </div>
-          ` : ''}
-          ${filesInfo.length > 0 ? `
-            <div style="margin: 20px 0;">
-              <strong>Прикрепленные файлы (${filesInfo.length}):</strong>
-              <ul>
-                ${filesInfo.map((f) => `<li>${f.name} (${Math.round(f.size / 1024)} KB)</li>`).join('')}
-              </ul>
-            </div>
-          ` : ''}
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
-            Отправлено: ${new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Omsk' })}
-          </div>
-        </div>
-      `;
-
-      const emailRecipients = import.meta.env.VITE_EMAIL_TO.split(',').map((email: string) => email.trim());
-
-      const resendResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'onboarding@resend.dev',
-          to: emailRecipients,
-          subject: emailSubject,
-          text: emailBody,
-          html: emailHtml,
-        }),
-      });
-
-      if (!resendResponse.ok) {
-        const errorData = await resendResponse.json();
-        console.error('Resend API error:', errorData);
+        console.error('Database error:', dbError);
       }
 
       setSubmitStatus('success');

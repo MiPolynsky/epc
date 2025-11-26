@@ -27,7 +27,8 @@ Deno.serve(async (req: Request) => {
     const payload: EmailPayload = await req.json();
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const emailTo = Deno.env.get("EMAIL_TO") || "expert.p.c@mail.ru";
+    const emailToStr = Deno.env.get("EMAIL_TO") || "expert.p.c@mail.ru";
+    const emailTo = emailToStr.split(',').map(email => email.trim());
     const emailFrom = Deno.env.get("EMAIL_FROM") || "onboarding@resend.dev";
 
     if (!resendApiKey) {
@@ -93,7 +94,7 @@ Deno.serve(async (req: Request) => {
       },
       body: JSON.stringify({
         from: emailFrom,
-        to: [emailTo],
+        to: emailTo,
         subject: emailSubject,
         text: emailBody,
         html: emailHtml,
