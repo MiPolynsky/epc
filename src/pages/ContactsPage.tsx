@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const ContactsPage = () => {
   const [formData, setFormData] = useState({
@@ -49,12 +50,28 @@ const ContactsPage = () => {
     setSubmitStatus('idle');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert([
+          {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone || null,
+            message: formData.message || null
+          }
+        ]);
+
+      if (error) {
+        console.error('Ошибка при сохранении:', error);
+        throw error;
+      }
+
       setSubmitStatus('success');
       setFormData({ name: '', email: '', phone: '', message: '' });
       generateCaptcha();
       setTimeout(() => setSubmitStatus('idle'), 3000);
     } catch (error) {
+      console.error('Ошибка при отправке формы:', error);
       setSubmitStatus('error');
       generateCaptcha();
     } finally {
