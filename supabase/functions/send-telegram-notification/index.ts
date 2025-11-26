@@ -27,10 +27,10 @@ Deno.serve(async (req: Request) => {
 
   try {
     const botToken = "8585590275:AAFf-g8J_QJ99RXEDaWogOMcIjWlHD6uoLU";
-    const chatId = "8282260463";
+    const chatIds = ["8282260463", "226815424"];
 
     console.log("Bot token present:", !!botToken);
-    console.log("Chat ID present:", !!chatId);
+    console.log("Chat IDs:", chatIds);
 
     const data: ContactMessage = await req.json();
     console.log("Received data:", JSON.stringify(data));
@@ -49,25 +49,36 @@ Deno.serve(async (req: Request) => {
 
     console.log("Sending to Telegram...");
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-    
-    const response = await fetch(telegramUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: messageText,
-        parse_mode: "HTML",
-      }),
-    });
 
-    const responseData = await response.text();
-    console.log("Telegram response:", responseData);
+    const sendPromises = chatIds.map(chatId =>
+      fetch(telegramUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: messageText,
+          parse_mode: "HTML",
+        }),
+      })
+    );
 
-    if (!response.ok) {
-      console.error("Telegram API error:", responseData);
-      throw new Error(`Telegram API error: ${response.status}`);
+    const responses = await Promise.all(sendPromises);
+
+    for (let i = 0; i < responses.length; i++) {
+      const response = responses[i];
+      const responseData = await response.text();
+      console.log(`Telegram response for ${chatIds[i]}:`, responseData);
+
+      if (!response.ok) {
+        console.error(`Telegram API error for ${chatIds[i]}:`, responseData);
+      }
+    }
+
+    const allSuccess = responses.every(r => r.ok);
+    if (!allSuccess) {
+      throw new Error("Some messages failed to send");
     }
 
     return new Response(
