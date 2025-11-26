@@ -27,7 +27,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const botToken = "8585590275:AAFf-g8J_QJ99RXEDaWogOMcIjWlHD6uoLU";
-    const chatId = "226815424";
+    const chatId = "8282260463";
 
     console.log("Bot token present:", !!botToken);
     console.log("Chat ID present:", !!chatId);
