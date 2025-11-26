@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест формы обратной связи</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #ffcc00;
+            color: black;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #e6b800;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Тест формы обратной связи</h1>
+
+    <form id="contactForm">
+        <div class="form-group">
+            <label for="name">Имя *</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Телефон *</label>
+            <input type="tel" id="phone" name="phone" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <label for="message">Сообщение</label>
+            <textarea id="message" name="message" rows="4"></textarea>
+        </div>
+
+        <button type="submit">Отправить заявку</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        const supabaseUrl = 'https://apzouhutnaeigyhdfyqf.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwem91aHV0bmFlaWd5aGRmeXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzNzYxODYsImV4cCI6MjA3ODk1MjE4Nn0.uk5wth7SDYWqmGuYDeTqs71AYM9RRS7anwwVwWcpHok';
+
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const resultDiv = document.getElementById('result');
+            const submitButton = e.target.querySelector('button[type="submit"]');
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Отправка...';
+            resultDiv.innerHTML = '';
+
+            const formData = new FormData(e.target);
+            const messageData = {
+                name: formData.get('name'),
+                phone: formData.get('phone'),
+                email: formData.get('email'),
+                message: formData.get('message') || '',
+                files_info: []
+            };
+
+            console.log('Sending data:', messageData);
+
+            try {
+                const { data, error } = await supabase
+                    .from('contact_messages')
+                    .insert([messageData])
+                    .select();
+
+                console.log('Result:', { data, error });
+
+                if (error) {
+                    resultDiv.className = 'error';
+                    resultDiv.innerHTML = `<strong>Ошибка:</strong> ${JSON.stringify(error)}`;
+                } else {
+                    resultDiv.className = 'success';
+                    resultDiv.innerHTML = `<strong>Успешно!</strong> Заявка отправлена. ID: ${data[0].id}`;
+                    e.target.reset();
+                }
+            } catch (err) {
+                console.error('Exception:', err);
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = `<strong>Исключение:</strong> ${err.message}`;
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Отправить заявку';
+            }
+        });
+    </script>
+</body>
+</html>
