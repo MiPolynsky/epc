@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Send, Phone, Mail, MapPin, Paperclip, X } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -61,33 +67,27 @@ const ContactForm = () => {
     setSubmitStatus('idle');
 
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert([
+          {
+            name: formData.name,
+            phone: formData.phone,
+            email: formData.email,
+            message: formData.message,
+            files_info: files.map(f => ({ name: f.name, size: f.size })),
+          }
+        ]);
 
-      const response = await fetch(`${supabaseUrl}/functions/v1/send-contact-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseKey}`,
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          phone: formData.phone,
-          email: formData.email,
-          message: formData.message,
-          files: files.map(f => ({ name: f.name, size: f.size })),
-        }),
-      });
-
-      if (response.ok) {
-        setSubmitStatus('success');
-        setFormData({ name: '', phone: '', email: '', message: '' });
-        setFiles([]);
-        generateCaptcha();
-        setTimeout(() => setSubmitStatus('idle'), 5000);
-      } else {
-        throw new Error('Failed to send');
+      if (error) {
+        throw error;
       }
+
+      setSubmitStatus('success');
+      setFormData({ name: '', phone: '', email: '', message: '' });
+      setFiles([]);
+      generateCaptcha();
+      setTimeout(() => setSubmitStatus('idle'), 5000);
     } catch (error) {
       console.error('Error sending form:', error);
       setSubmitStatus('error');
