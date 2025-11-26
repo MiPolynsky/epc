@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестовая форма обратной связи</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .captcha-box {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .captcha-question {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .captcha-input {
+            width: 80px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        #console-log {
+            margin-top: 30px;
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            word-wrap: break-word;
+        }
+
+        .log-time {
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Тестовая форма обратной связи</h1>
+
+        <div id="message" class="message"></div>
+
+        <form id="contactForm">
+            <div class="form-group">
+                <label for="name">Имя <span class="required">*</span></label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Телефон <span class="required">*</span></label>
+                <input type="tel" id="phone" name="phone" required placeholder="+7 (___) ___-__-__">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="message">Сообщение</label>
+                <textarea id="message" name="message"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Решите пример <span class="required">*</span></label>
+                <div class="captcha-box">
+                    <span class="captcha-question" id="captchaQuestion"></span>
+                    <input type="text" class="captcha-input" id="captchaAnswer" required>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">Отправить заявку</button>
+        </form>
+
+        <div id="console-log"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const logContainer = document.getElementById('console-log');
+
+        function log(message, data = null) {
+            const time = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+
+            let logText = `<span class="log-time">[${time}]</span> ${message}`;
+            if (data) {
+                logText += '\n' + JSON.stringify(data, null, 2);
+            }
+
+            logEntry.innerHTML = logText;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            console.log(message, data);
+        }
+
+        log('Инициализация формы...');
+
+        const supabaseUrl = 'https://apzouhutnaeigyhdfyqf.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwem91aHV0bmFlaWd5aGRmeXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzNzYxODYsImV4cCI6MjA3ODk1MjE4Nn0.uk5wth7SDYWqmGuYDeTqs71AYM9RRS7anwwVwWcpHok';
+
+        log('Создание Supabase клиента...', { url: supabaseUrl });
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        log('Supabase клиент создан успешно');
+
+        let captchaNum1, captchaNum2;
+
+        function generateCaptcha() {
+            captchaNum1 = Math.floor(Math.random() * 10) + 1;
+            captchaNum2 = Math.floor(Math.random() * 10) + 1;
+            document.getElementById('captchaQuestion').textContent = `${captchaNum1} + ${captchaNum2} = ?`;
+            log('Капча сгенерирована', { num1: captchaNum1, num2: captchaNum2, answer: captchaNum1 + captchaNum2 });
+        }
+
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type} show`;
+            log(`Сообщение пользователю: [${type}] ${text}`);
+
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+            }, 5000);
+        }
+
+        generateCaptcha();
+
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            log('Форма отправлена, начинаем обработку...');
+
+            const formData = new FormData(e.target);
+            const data = {
+                name: formData.get('name'),
+                phone: formData.get('phone'),
+                email: formData.get('email'),
+                message: formData.get('message') || '',
+                files_info: []
+            };
+
+            log('Данные формы собраны', data);
+
+            const captchaAnswer = parseInt(document.getElementById('captchaAnswer').value);
+            const correctAnswer = captchaNum1 + captchaNum2;
+
+            log('Проверка капчи', {
+                userAnswer: captchaAnswer,
+                correctAnswer: correctAnswer,
+                isCorrect: captchaAnswer === correctAnswer
+            });
+
+            if (captchaAnswer !== correctAnswer) {
+                showMessage('Неверный ответ на пример. Попробуйте еще раз.', 'error');
+                generateCaptcha();
+                document.getElementById('captchaAnswer').value = '';
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Отправка...';
+            log('Кнопка заблокирована, отправляем в Supabase...');
+
+            try {
+                log('Отправка данных в таблицу contact_messages...');
+                const { data: result, error } = await supabase
+                    .from('contact_messages')
+                    .insert([data])
+                    .select();
+
+                if (error) {
+                    log('ОШИБКА при сохранении', error);
+                    showMessage('Ошибка при отправке: ' + error.message, 'error');
+                } else {
+                    log('✓ Заявка успешно сохранена!', result);
+                    showMessage('Спасибо! Ваша заявка отправлена.', 'success');
+                    e.target.reset();
+                    generateCaptcha();
+                }
+            } catch (error) {
+                log('КРИТИЧЕСКАЯ ОШИБКА', error);
+                showMessage('Произошла ошибка. Попробуйте еще раз.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Отправить заявку';
+                log('Кнопка разблокирована');
+            }
+        });
+
+        log('Форма готова к использованию!');
+    </script>
+</body>
+</html>
