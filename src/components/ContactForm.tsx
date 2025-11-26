@@ -67,36 +67,20 @@ const ContactForm = () => {
     setSubmitStatus('idle');
 
     try {
-      const messageData = {
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        message: formData.message,
-        files_info: files.map(f => ({ name: f.name, size: f.size })),
-      };
-
-      const { error: dbError } = await supabase
+      const { error } = await supabase
         .from('contact_messages')
-        .insert([messageData]);
+        .insert([
+          {
+            name: formData.name,
+            phone: formData.phone,
+            email: formData.email,
+            message: formData.message,
+            files_info: files.map(f => ({ name: f.name, size: f.size })),
+          }
+        ]);
 
-      if (dbError) {
-        throw dbError;
-      }
-
-      const emailResponse = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-contact-email`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify(messageData),
-        }
-      );
-
-      if (!emailResponse.ok) {
-        console.error('Email sending failed, but message saved to database');
+      if (error) {
+        throw error;
       }
 
       setSubmitStatus('success');
