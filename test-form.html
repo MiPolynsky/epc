@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест формы</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Тест отправки формы</h1>
+    <button id="testBtn">Отправить тестовую заявку</button>
+    <div id="result"></div>
+
+    <script>
+        const supabaseUrl = 'https://apzouhutnaeigyhdfyqf.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwem91aHV0bmFlaWd5aGRmeXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzNzYxODYsImV4cCI6MjA3ODk1MjE4Nn0.uk5wth7SDYWqmGuYDeTqs71AYM9RRS7anwwVwWcpHok';
+
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Отправка...';
+
+            const messageData = {
+                name: 'Тест из HTML',
+                phone: '+7 (900) 555-66-77',
+                email: 'htmltest@example.com',
+                message: 'Тестовая заявка из простого HTML файла',
+                files_info: []
+            };
+
+            console.log('Sending data:', messageData);
+
+            try {
+                const { data, error } = await supabase
+                    .from('contact_messages')
+                    .insert([messageData])
+                    .select();
+
+                console.log('Result:', { data, error });
+
+                if (error) {
+                    resultDiv.innerHTML = `<p style="color: red;">Ошибка: ${JSON.stringify(error)}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: green;">Успешно! ID: ${data[0].id}</p>`;
+                }
+            } catch (err) {
+                console.error('Exception:', err);
+                resultDiv.innerHTML = `<p style="color: red;">Исключение: ${err.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
