@@ -8,6 +8,7 @@ import ServicesPage from './pages/ServicesPage';
 import ServiceDetailPage from './pages/ServiceDetailPage';
 import DocumentsPage from './pages/DocumentsPage';
 import ContactsPage from './pages/ContactsPage';
+import AdminPage from './pages/AdminPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 function ScrollToTop() {
@@ -34,6 +35,7 @@ function App() {
             <Route path="/services/:serviceId" element={<ServiceDetailPage />} />
             <Route path="/documents" element={<DocumentsPage />} />
             <Route path="/contacts" element={<ContactsPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>

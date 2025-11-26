@@ -64,6 +64,9 @@ const Footer = () => {
 
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
           <p>&copy; 2024 ЭПЦ. Все права защищены.</p>
+          <Link to="/admin" className="text-gray-600 hover:text-gray-500 text-xs mt-2 inline-block">
+            Админ
+          </Link>
         </div>
       </div>
     </footer>
