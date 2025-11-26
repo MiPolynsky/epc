@@ -16,14 +16,17 @@ const ServicesOverview = () => {
                 className="bg-gray-50 rounded-lg p-6 hover:shadow-lg transition-shadow border border-gray-200 hover:border-[#ffcc00] group"
               >
                 <div className="flex items-start mb-4">
-                  <div className="bg-[#ffcc00] p-3 rounded-lg group-hover:scale-110 transition-transform">
+                  <div className="bg-[#ffcc00] p-3 rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
                     <Icon className="w-6 h-6 text-black" />
                   </div>
+                  <h3 className="text-lg font-semibold text-gray-900 group-hover:text-black ml-4 md:hidden">
+                    {service.title}
+                  </h3>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-black">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-black hidden md:block">
                   {service.title}
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
+                <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3 hidden md:block">
                   {service.description}
                 </p>
                 <div className="flex items-center text-black text-sm font-medium">
