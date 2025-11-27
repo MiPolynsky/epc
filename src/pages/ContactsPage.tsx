@@ -145,8 +145,8 @@ const ContactsPage = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Email</h3>
-                  <a href="mailto:expert.p.c@mail.ru" className="text-xl text-gray-700 hover:text-[#ffcc00] transition-colors">
-                    expert.p.c@mail.ru
+                  <a href="mailto:info@epc-expert.ru" className="text-xl text-gray-700 hover:text-[#ffcc00] transition-colors">
+                    info@epc-expert.ru
                   </a>
                   <p className="text-sm text-gray-600 mt-1">Ответим в течение 24 часов</p>
                 </div>

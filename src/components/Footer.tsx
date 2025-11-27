@@ -55,7 +55,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Контакты</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
               <li>+7 913 634 8192</li>
-              <li>expert.p.c@mail.ru</li>
+              <li>info@epc-expert.ru</li>
               <li>г. Омск, ул. Голика, д. 2, оф. 37</li>
               <li>Пн-Пт: 9:00 - 18:00</li>
             </ul>

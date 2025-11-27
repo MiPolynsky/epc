@@ -30,7 +30,7 @@ Deno.serve(async (req: Request) => {
     const smtpPort = parseInt(Deno.env.get("SMTP_PORT") || "587");
     const smtpUser = Deno.env.get("SMTP_USER");
     const smtpPass = Deno.env.get("SMTP_PASS");
-    const emailToStr = Deno.env.get("EMAIL_TO") || "expert.p.c@mail.ru";
+    const emailToStr = Deno.env.get("EMAIL_TO") || "info@epc-expert.ru";
     const emailTo = emailToStr.split(',').map(email => email.trim());
 
     if (!smtpUser || !smtpPass) {

@@ -140,11 +140,11 @@ const ServiceDetailPage = () => {
                   +7 913 634 8192
                 </a>
                 <a
-                  href="mailto:expert.p.c@mail.ru"
+                  href="mailto:info@epc-expert.ru"
                   className="flex items-center text-gray-700 hover:text-[#ffcc00] transition-colors"
                 >
                   <Mail className="w-5 h-5 mr-3" />
-                  expert.p.c@mail.ru
+                  info@epc-expert.ru
                 </a>
               </div>
 
