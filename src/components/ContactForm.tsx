@@ -62,13 +62,31 @@ const ContactForm = () => {
 
     try {
       const filesInfo = files.map(f => ({ name: f.name, size: f.size }));
+      const filePaths: string[] = [];
+
+      for (const file of files) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('contact-files')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          console.error('File upload error:', uploadError);
+        } else {
+          filePaths.push(filePath);
+        }
+      }
 
       const messageData = {
         name: formData.name,
         phone: formData.phone,
         email: formData.email,
         message: formData.message || '',
-        files_info: filesInfo
+        files_info: filesInfo,
+        file_paths: filePaths
       };
 
       console.log('Sending data:', messageData);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Mail, Phone, Calendar, FileText, Trash2, CheckCircle, Archive } from 'lucide-react';
+import { Mail, Phone, Calendar, FileText, Trash2, CheckCircle, Archive, Download } from 'lucide-react';
 
 interface ContactMessage {
   id: string;
@@ -9,6 +9,7 @@ interface ContactMessage {
   email: string;
   message: string;
   files_info: Array<{ name: string; size: number }>;
+  file_paths?: string[];
   status: 'new' | 'read' | 'archived';
   created_at: string;
 }
@@ -114,6 +115,32 @@ export default function AdminPage() {
     await supabase.auth.signOut();
     setUser(null);
     setMessages([]);
+  }
+
+  async function downloadFile(filePath: string, originalName: string) {
+    try {
+      const { data, error } = await supabase.storage
+        .from('contact-files')
+        .download(filePath);
+
+      if (error) {
+        console.error('Download error:', error);
+        alert('Ошибка загрузки файла');
+        return;
+      }
+
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = originalName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Ошибка загрузки файла');
+    }
   }
 
   if (!user) {
@@ -301,13 +328,27 @@ export default function AdminPage() {
                       <FileText className="w-4 h-4" />
                       Прикрепленные файлы ({msg.files_info.length}):
                     </div>
-                    <ul className="list-disc list-inside text-gray-700">
+                    <div className="space-y-2">
                       {msg.files_info.map((file, idx) => (
-                        <li key={idx}>
-                          {file.name} ({Math.round(file.size / 1024)} KB)
-                        </li>
+                        <div key={idx} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-gray-500" />
+                            <span className="text-gray-700">
+                              {file.name} ({Math.round(file.size / 1024)} KB)
+                            </span>
+                          </div>
+                          {msg.file_paths && msg.file_paths[idx] && (
+                            <button
+                              onClick={() => downloadFile(msg.file_paths![idx], file.name)}
+                              className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                            >
+                              <Download className="w-4 h-4" />
+                              Скачать
+                            </button>
+                          )}
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
 
